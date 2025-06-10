@@ -4,17 +4,13 @@ import config from './config.js';
 class Sidebar {
   constructor() {
     this.isOpen = false;
-    this.currentContent = null;
-    this.flashcards = null;
+    this.flashcards = {}; // Cache of loaded flashcards
     this.element = null;
     this.contentElement = null;
     this.fontSizeControl = null;
     this.isLoading = false;
     this.baseFontSize = 16; // Default font size in pixels
     this.currentFontSize = this.baseFontSize;
-    
-    // Load flashcards in the background
-    this.loadFlashcards();
     
     // Global escape key handler
     document.addEventListener('keydown', (e) => {
@@ -52,25 +48,56 @@ class Sidebar {
     // Add to DOM
     document.querySelector('#app').appendChild(this.element);
     
+    // Initialize with welcome content so it's never empty
+    this.renderWelcomeContent();
+    
     return this;
   }
   
-  async loadFlashcards() {
-    if (this.flashcards || this.isLoading) return;
+  async loadFlashcard(label) {
+    if (!label) return '';
     
-    this.isLoading = true;
-    try {
-      const response = await fetch(config.flashcardsUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to load flashcards: ${response.statusText}`);
-      }
-      this.flashcards = await response.json();
-    } catch (error) {
-      console.error('Error loading flashcards:', error);
-      this.flashcards = {};
-    } finally {
-      this.isLoading = false;
+    // Return from cache if already loaded
+    if (this.flashcards[label]) return this.flashcards[label];
+    
+    // Avoid concurrent requests for the same label
+    if (this._pendingRequests && this._pendingRequests[label]) {
+      return this._pendingRequests[label];
     }
+    
+    // Create pending requests tracker if it doesn't exist
+    if (!this._pendingRequests) this._pendingRequests = {};
+    
+    // Create a promise for this request
+    const requestPromise = new Promise(async (resolve) => {
+      try {
+        // Fetch with cache-first strategy
+        const response = await fetch(`${config.cardsFolder}${label}.md`, {
+          cache: 'force-cache' // Prefer cached version if available
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load flashcard for ${label}: ${response.statusText}`);
+        }
+        
+        // Store the markdown content directly
+        const content = await response.text();
+        this.flashcards[label] = content;
+        resolve(content);
+      } catch (error) {
+        console.error(`Error loading flashcard for ${label}:`, error);
+        // Return empty string if not found
+        this.flashcards[label] = '';
+        resolve('');
+      } finally {
+        // Remove from pending requests
+        delete this._pendingRequests[label];
+      }
+    });
+    
+    // Store the promise so we can return it for concurrent requests
+    this._pendingRequests[label] = requestPromise;
+    return requestPromise;
   }
   
   open(label) {
@@ -105,33 +132,43 @@ class Sidebar {
   }
   
   async showContentForLabel(label) {
-    // Show loading state
-    this.contentElement.innerHTML = '<div class="loading">Loading content...</div>';
-    
-    // Ensure flashcards are loaded
-    if (!this.flashcards && !this.isLoading) {
-      await this.loadFlashcards();
+    // Show welcome content when no specific label is provided
+    if (!label) {
+      this.renderWelcomeContent();
+      return;
     }
     
-    // Wait until flashcards are loaded
-    if (this.isLoading) {
-      const checkInterval = setInterval(() => {
-        if (!this.isLoading) {
-          clearInterval(checkInterval);
-          this.renderContent(label);
-        }
-      }, 100);
-    } else {
-      this.renderContent(label);
+    // Show loading bar
+    this.contentElement.innerHTML = `
+      <div class="simple-loading">
+        <div class="loading-bar"></div>
+      </div>
+    `;
+    
+    try {
+      // Fetch the specific flashcard content
+      const content = await this.loadFlashcard(label);
+      
+      // Render the content once loaded
+      this.renderContent(label, content);
+    } catch (error) {
+      console.error('Error showing content for label:', error);
+      
+      // Show error in content area
+      this.contentElement.innerHTML = `
+        <div class="load-error">
+          Failed to load content.
+        </div>
+      `;
     }
   }
   
-  renderContent(label) {
-    // Find content for the label
-    let content = 'No information available for this item.';
-    
-    if (this.flashcards && label && this.flashcards[label]) {
-      content = this.flashcards[label];
+  renderContent(label, content = null) {
+    // If content not provided, try to get from cache (fallback)
+    if (content === null) {
+      content = (label && this.flashcards[label]) 
+        ? this.flashcards[label] 
+        : 'No information available for this item.';
     }
     
     // Build HTML with optional image and markdown content
@@ -149,23 +186,25 @@ class Sidebar {
     // Add feedback link
     html += this.createFeedbackLink(label, content);
     
-    this.contentElement.innerHTML = html;
+    // Direct replacement without transitions to eliminate flickering
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    container.className = 'content-container';
+    
+    // Replace content directly
+    this.contentElement.innerHTML = '';
+    this.contentElement.appendChild(container);
   }
 
   createFeedbackLink(label, content) {
     if (!label) return ''; // Don't show feedback link if no label is provided
     
-    const encodedLabel = encodeURIComponent(label);
-    const encodedContent = encodeURIComponent(content.substring(0, 500) + (content.length > 500 ? '...' : ''));
-    const issueTitle = encodeURIComponent(`Content improvement for: ${label}`);
-    const issueBody = encodeURIComponent(`I found an issue with the "${label}" flashcard content.\n\nCurrent content:\n\`\`\`\n${content.substring(0, 1000) + (content.length > 1000 ? '...' : '')}\n\`\`\`\n\nSuggested improvement:\n[Please describe the issue or suggestion here]`);
-    
-    const githubIssueUrl = `https://github.com/anvaka/hsk-land/issues/new?title=${issueTitle}&body=${issueBody}`;
+    const githubCardPage = `https://github.com/anvaka/lang-land-data/blob/main/hsk/v1/cards/${label}.md`;
     
     return `
       <hr class="feedback-separator">
       <div class="feedback-link">
-        <small>Found an error? <a href="${githubIssueUrl}" target="_blank" rel="noopener noreferrer">Please improve this card</a></small>
+        <small>Found an error? <a href="${githubCardPage}" target="_blank" rel="noopener noreferrer">Please improve this card</a></small>
       </div>
     `;
   }
@@ -215,6 +254,26 @@ class Sidebar {
 
   resetFontSize() {
     this.setFontSize(this.baseFontSize);
+  }
+  
+  renderWelcomeContent() {
+    // Provide helpful initial content
+    const welcomeHtml = `
+      <div class="welcome-content">
+        <h2>Welcome to Language Land</h2>
+        <p>Click on any word on the map to see its definition.</p>
+        <p>This sidebar will show you:</p>
+        <ul>
+          <li>Word definitions</li>
+          <li>Example sentences</li>
+          <li>Visual aids when available</li>
+        </ul>
+        <p>Use the font size controls at the bottom to adjust text size.</p>
+      </div>
+    `;
+    
+    // Direct content replacement for maximum performance
+    this.contentElement.innerHTML = welcomeHtml;
   }
 }
 

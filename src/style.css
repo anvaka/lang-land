@@ -122,6 +122,12 @@ html {
   padding: 16px;
   overflow-y: auto;
   flex: 1;
+  position: relative;
+}
+
+/* Content container */
+.content-container {
+  min-height: 50px; /* Ensure we have at least some height even with empty content */
 }
 
 /* Markdown content styles */
@@ -163,6 +169,61 @@ html {
   text-align: center;
   color: var(--sidebar-text);
   opacity: 0.7;
+}
+
+.simple-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+.loading-bar::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  background-color: var(--sidebar-text);
+  opacity: 0.7;
+  animation: loading-bar 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-bar {
+  0% {
+    left: -50%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.load-error {
+  padding: 16px;
+  text-align: center;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 4px;
+  margin: 16px;
+  /* Using the sidebar-text with opacity ensures it works in both themes */
+  border: 1px solid rgba(var(--sidebar-text), 0.1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Font size control */
@@ -360,6 +421,11 @@ html {
     bottom: 12px;
     right: 12px;
   }
+  
+  /* Faster transitions on mobile */
+  .sidebar {
+    transition: transform 0.2s ease-in-out;
+  }
 }
 
 /* Feedback link styles */
@@ -380,6 +446,31 @@ html {
 
 .feedback-link a:hover {
   color: rgba(100, 108, 255, 1);
+}
+
+/* Welcome content styles */
+.welcome-content {
+  padding: 16px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.welcome-content h2 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: var(--sidebar-text);
+}
+
+.welcome-content p {
+  margin: 12px 0;
+}
+
+.welcome-content ul {
+  text-align: left;
+  margin: 16px auto;
+  max-width: 80%;
+  padding-left: 20px;
 }
 
 .logo {

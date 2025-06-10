@@ -48,6 +48,8 @@ export default {
    */
   flashcardsUrl: `${server}${version}/flashcards.json`,
 
+  cardsFolder: `${server}${version}/cards/`,
+
   /**
    * Images folder contains all images used in the flashcards.
    */
