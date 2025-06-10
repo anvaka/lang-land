@@ -20,6 +20,8 @@ import sharp from 'sharp';
 // Constants
 const PADDING = 100; // Padding around the edges of the final image
 const SCALE_FACTOR = 120; // Scale from map coordinates to pixels (higher value = more detail)
+const DATA_DIR = path.join('..', 'lang-land-data', 'hsk', 'v1');
+const WEBP_IMAGES_DIR = path.join(DATA_DIR, 'images_optimized'); // Directory with WebP images
 const OUTPUT_FILENAME = 'clipped_regions_map.png';
 const DRAW_BORDERS = false; // Whether to draw region borders
 const BORDER_COLOR = 'rgba(255, 255, 255, 0.5)'; 
@@ -66,97 +68,83 @@ async function createClippedMap() {
     ctx.fillStyle = BACKGROUND_COLOR;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     
-    // 3. Draw the borders to outline the map
-    // await drawMapBorders(ctx, mapBounds, SCALE_FACTOR, PADDING);
-    
-    // 4. Load all region files
-    const regionFiles = await glob('public/regions/*_regions.geojson');
-    console.log(`Found ${regionFiles.length} region files`);
-    
-    // 5. Process regions and their corresponding images
     let processedImages = 0;
     let missingImages = 0;
     let colorFilled = 0;
     let convertedImages = 0;
-    let totalRegions = 0;
     
     // Count total regions for progress reporting
-    for (const regionFile of regionFiles) {
-      const regionData = JSON.parse(fs.readFileSync(regionFile, 'utf8'));
-      totalRegions += regionData.features.length;
-    }
+    const regionFile = path.join(DATA_DIR, 'regions.geojson');;
+    const regionData = JSON.parse(fs.readFileSync(regionFile, 'utf8'));
+    const totalRegions = regionData.features.length;
     console.log(`Total regions to process: ${totalRegions}`);
     
-    let currentRegion = 0;
+    console.log(`Processing ${path.basename(regionFile)}...`);
     
-    for (const regionFile of regionFiles) {
-      console.log(`Processing ${path.basename(regionFile)}...`);
-      const regionData = JSON.parse(fs.readFileSync(regionFile, 'utf8'));
-      
-      // Process regions in batches for parallel processing
-      const regionBatches = [];
-      for (let i = 0; i < regionData.features.length; i += BATCH_SIZE) {
-        regionBatches.push(regionData.features.slice(i, i + BATCH_SIZE));
-      }
-      
-      for (const batch of regionBatches) {
-        // Process batch in parallel
-        await Promise.all(batch.map(async (feature) => {
-          currentRegion++;
-          if (currentRegion % 100 === 0) {
-            const progress = Math.round((currentRegion / totalRegions) * 100);
-            console.log(`Progress: ${progress}% (${currentRegion}/${totalRegions})`);
-          }
-          
-          const chineseWord = feature.properties.label;
-          const webpImagePath = path.join('public/images_optimized', `${chineseWord}.webp`);
-          const pngImagePath = path.join(TMP_DIR, `${chineseWord}.png`);
-          
-          // Transform polygon coordinates to canvas space
-          const polygon = transformPolygonToCanvas(
-            feature.geometry.coordinates[0], 
-            mapBounds,
-            SCALE_FACTOR,
-            PADDING
-          );
-          
-          // Check if image exists
-          if (fs.existsSync(webpImagePath)) {
-            try {
-              // Check if we've already processed this image
-              let image;
-              if (imageCache.has(chineseWord)) {
-                image = imageCache.get(chineseWord);
-              } else {
-                // Convert WebP to PNG and then load it
-                await convertWebpToPng(webpImagePath, pngImagePath);
-                convertedImages++;
-                
-                image = await loadImage(pngImagePath);
-                imageCache.set(chineseWord, image); // Cache the loaded image
-              }
+    // Process regions in batches for parallel processing
+    const regionBatches = [];
+    for (let i = 0; i < regionData.features.length; i += BATCH_SIZE) {
+      regionBatches.push(regionData.features.slice(i, i + BATCH_SIZE));
+    }
+    
+    let currentRegion = 0;
+    for (const batch of regionBatches) {
+      // Process batch in parallel
+      await Promise.all(batch.map(async (feature) => {
+        currentRegion++;
+        if (currentRegion % 100 === 0) {
+          const progress = Math.round((currentRegion / totalRegions) * 100);
+          console.log(`Progress: ${progress}% (${currentRegion}/${totalRegions})`);
+        }
+        
+        const chineseWord = feature.id;
+        const webpImagePath = path.join(WEBP_IMAGES_DIR, `${chineseWord}.webp`);
+        const pngImagePath = path.join(TMP_DIR, `${chineseWord}.png`);
+        
+        // Transform polygon coordinates to canvas space
+        const polygon = transformPolygonToCanvas(
+          feature.geometry.coordinates[0], 
+          mapBounds,
+          SCALE_FACTOR,
+          PADDING
+        );
+        
+        // Check if image exists
+        if (fs.existsSync(webpImagePath)) {
+          try {
+            // Check if we've already processed this image
+            let image;
+            if (imageCache.has(chineseWord)) {
+              image = imageCache.get(chineseWord);
+            } else {
+              // Convert WebP to PNG and then load it
+              await convertWebpToPng(webpImagePath, pngImagePath);
+              convertedImages++;
               
-              await clipAndDrawImage(ctx, image, polygon);
-              processedImages++;
-            } catch (err) {
-              console.error(`Error processing image ${chineseWord}:`, err);
-              // Fallback to color fill if image loading fails
-              fillPolygonWithColor(ctx, polygon, getRegionColor(feature.properties.fill));
-              colorFilled++;
+              image = await loadImage(pngImagePath);
+              imageCache.set(chineseWord, image); // Cache the loaded image
             }
-          } else {
-            // Use color fill for regions without images
-            // fillPolygonWithColor(ctx, polygon, getRegionColor(feature.properties.fill));
+            
+            await clipAndDrawImage(ctx, image, polygon);
+            processedImages++;
+          } catch (err) {
+            console.error(`Error processing image ${chineseWord}:`, err);
+            // Fallback to color fill if image loading fails
+            fillPolygonWithColor(ctx, polygon, getRegionColor(feature.properties.fill));
             colorFilled++;
-            missingImages++;
           }
-          
-          // Draw region border if enabled
-          if (DRAW_BORDERS) {
-            drawPolygonBorder(ctx, polygon, BORDER_COLOR, BORDER_WIDTH);
-          }
-        }));
-      }
+        } else {
+          // Use color fill for regions without images
+          // fillPolygonWithColor(ctx, polygon, getRegionColor(feature.properties.fill));
+          colorFilled++;
+          missingImages++;
+        }
+        
+        // Draw region border if enabled
+        if (DRAW_BORDERS) {
+          drawPolygonBorder(ctx, polygon, BORDER_COLOR, BORDER_WIDTH);
+        }
+      }));
     }
     
     console.log(`Processed ${processedImages} images, converted ${convertedImages} WebP files, filled ${colorFilled} regions with color (${missingImages} missing images)`);
@@ -222,41 +210,10 @@ function cleanupTempFiles() {
 }
 
 /**
- * Draw the borders from borders.geojson
- */
-async function drawMapBorders(ctx, mapBounds, scaleFactor, padding) {
-  const bordersPath = path.join('public', 'borders.geojson');
-  const data = JSON.parse(fs.readFileSync(bordersPath, 'utf8'));
-  
-  // ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-  // ctx.lineWidth = 2;
-  
-  data.features.forEach(feature => {
-    const polygon = transformPolygonToCanvas(
-      feature.geometry.coordinates[0],
-      mapBounds,
-      scaleFactor,
-      padding
-    );
-    
-    ctx.beginPath();
-    polygon.forEach((point, i) => {
-      if (i === 0) {
-        ctx.moveTo(point[0], point[1]);
-      } else {
-        ctx.lineTo(point[0], point[1]);
-      }
-    });
-    ctx.closePath();
-    ctx.stroke();
-  });
-}
-
-/**
  * Get the bounds of the map from borders.geojson
  */
 async function getMapBounds() {
-  const bordersPath = path.join('public', 'borders.geojson');
+  const bordersPath = path.join(DATA_DIR, 'borders.geojson');
   const data = JSON.parse(fs.readFileSync(bordersPath, 'utf8'));
   
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;

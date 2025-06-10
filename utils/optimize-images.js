@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 
 // Configuration
 const sourcePath = './public/images';
-const outputPath = './public/images_optimized';
+const outputPath = '../lang-land-data/hsk/v1/images_optimized';
 const targetWidth = 512; // Target width for the resized images (height will scale proportionally)
 const quality = 85;     // WebP quality (0-100), 85 offers good balance of quality and size
 

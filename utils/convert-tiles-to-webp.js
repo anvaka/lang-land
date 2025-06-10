@@ -9,7 +9,8 @@ import { execSync } from 'child_process';
 
 // Configuration
 const quality = 85;  // WebP quality (0-100)
-let tileDir = './public/tiles';  // Default tiles directory
+const DATA_DIR = path.join('..', 'lang-land-data', 'hsk', 'v1');
+let tileDir = path.join(DATA_DIR, 'tiles');  // Default tiles directory
 let conversionMode = 'replace';  // 'replace' or 'copy' mode
 
 // Process command line arguments
