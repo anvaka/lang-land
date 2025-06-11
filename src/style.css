@@ -98,9 +98,9 @@ html {
 
 .sidebar-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: transparent;
+  top: 8px;
+  right: 8px;
+  background: var(--sidebar-bg);
   border: none;
   color: var(--sidebar-text);
   font-size: 1.5rem;
@@ -175,39 +175,17 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60px;
+  height: 100px;
   padding: 20px;
-  overflow: hidden;
-  position: relative;
 }
 
-.loading-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 2px;
-  width: 100%;
-  overflow: hidden;
-  background-color: transparent;
-}
-
-.loading-bar::before {
-  content: "";
-  position: absolute;
-  height: 100%;
-  width: 50%;
-  background-color: var(--sidebar-text);
-  opacity: 0.7;
-  animation: loading-bar 1.5s ease-in-out infinite;
-}
-
-@keyframes loading-bar {
-  0% {
-    left: -50%;
-  }
-  100% {
-    left: 100%;
-  }
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(128, 128, 128, 0.2);
+  border-top-color: var(--sidebar-text);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 .load-error {
@@ -217,8 +195,10 @@ html {
   background: rgba(255, 107, 107, 0.1);
   border-radius: 4px;
   margin: 16px;
-  /* Using the sidebar-text with opacity ensures it works in both themes */
-  border: 1px solid rgba(var(--sidebar-text), 0.1);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes fadeIn {

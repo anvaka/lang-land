@@ -149,7 +149,7 @@ class Sidebar {
       // Fetch the specific flashcard content
       const content = await this.loadFlashcard(label);
       
-      // Render the content once loaded
+      // Only render content with feedback link if we have valid content
       this.renderContent(label, content);
     } catch (error) {
       console.error('Error showing content for label:', error);
@@ -183,8 +183,10 @@ class Sidebar {
     // Render markdown content
     html += marked.parse(content);
     
-    // Add feedback link
-    html += this.createFeedbackLink(label, content);
+    // Add feedback link only if there's valid content (not during loading)
+    if (content && content !== 'No information available for this item.' && label) {
+      html += this.createFeedbackLink(label, content);
+    }
     
     // Direct replacement without transitions to eliminate flickering
     const container = document.createElement('div');
