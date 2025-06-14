@@ -1,6 +1,22 @@
 import { marked } from 'marked';
 import config from './config.js';
 
+import { getGraph } from './graph.js';
+import turnChineseWordsIntoLinks from './lib/turnChineseWordsIntoLinks.js';
+
+let graph = null;
+let rerenderWhenGraphReady = null;
+
+// preemptively load the graph
+getGraph().then(g => {
+  graph = g;
+  // If we had a pending render, do it now
+  if (rerenderWhenGraphReady) {
+    rerenderWhenGraphReady();
+    rerenderWhenGraphReady = null; // Clear the pending render
+  }
+});
+
 class Sidebar {
   constructor() {
     this.isOpen = false;
@@ -51,6 +67,19 @@ class Sidebar {
     // Initialize with welcome content so it's never empty
     this.renderWelcomeContent();
     
+    // Handle clicks on word links inside the sidebar
+    this.element.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'A' || !e.target.hasAttribute('data-word')) {
+        return;
+      }
+      const word = e.target.getAttribute('data-word');
+      if (this.openNewWordCallback) {
+        const coordinates = graph.getNode(word)?.data?.l?.split(',').map(Number);
+        this.openNewWordCallback(word, coordinates);
+        this.open(word, this.openNewWordCallback)
+        e.preventDefault();
+      }
+    });
     return this;
   }
   
@@ -100,8 +129,15 @@ class Sidebar {
     return requestPromise;
   }
   
-  open(label) {
+  open(label, openNewWordCallback = null) {
+    if (this.lastLabel === label && this.isOpen) {
+      // If already open for this label, do nothing
+      return this;
+    }
+
+    this.lastLabel = label;
     if (!this.element) this.initialize();
+    this.openNewWordCallback = openNewWordCallback;
     
     // Reset scroll to top when opening
     if (this.contentElement) this.contentElement.scrollTop = 0;
@@ -180,12 +216,18 @@ class Sidebar {
       html += `<img src="${config.imagesFolder}/${label}.webp" alt="${label}" class="sidebar-image" onerror="this.style.display='none'">`;
     }
     
+    if (graph) {
+      content = turnChineseWordsIntoLinks(content, graph)
+    } else {
+      rerenderWhenGraphReady = this.renderContent.bind(this, label, content);
+      // Render without links first if graph is not ready
+    }
     // Render markdown content
     html += marked.parse(content);
     
     // Add feedback link only if there's valid content (not during loading)
     if (content && content !== 'No information available for this item.' && label) {
-      html += this.createFeedbackLink(label, content);
+      html += createFeedbackLink(label, content);
     }
     
     // Direct replacement without transitions to eliminate flickering
@@ -196,19 +238,6 @@ class Sidebar {
     // Replace content directly
     this.contentElement.innerHTML = '';
     this.contentElement.appendChild(container);
-  }
-
-  createFeedbackLink(label, content) {
-    if (!label) return ''; // Don't show feedback link if no label is provided
-    
-    const githubCardPage = `https://github.com/anvaka/lang-land-data/blob/main/hsk/v1/cards/${label}.md`;
-    
-    return `
-      <hr class="feedback-separator">
-      <div class="feedback-link">
-        <small>Found an error? <a href="${githubCardPage}" target="_blank" rel="noopener noreferrer">Please improve this card</a></small>
-      </div>
-    `;
   }
 
   createFontSizeControl() {
@@ -281,3 +310,16 @@ class Sidebar {
 
 // Create and export a singleton instance
 export const sidebar = new Sidebar();
+
+function createFeedbackLink(label, content) {
+  if (!label) return ''; // Don't show feedback link if no label is provided
+  
+  const githubCardPage = `https://github.com/anvaka/lang-land-data/blob/main/hsk/v1/cards/${label}.md`;
+  
+  return `
+    <hr class="feedback-separator">
+    <div class="feedback-link">
+      <small>Found an error? <a href="${githubCardPage}" target="_blank" rel="noopener noreferrer">Please improve this card</a></small>
+    </div>
+  `;
+}

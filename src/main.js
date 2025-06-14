@@ -11,7 +11,7 @@ import config from './config.js';
 const discoveredRegions = new Set();
 let regionFeatureIds = {};
 let allRegionFeaturesStore = null; // Store all region features for lookup
-
+let graph;
 // Initialize the app with a map container
 document.querySelector('#app').innerHTML = `<div id="map"></div><button class="about-button" aria-label="About HSK Land">i</button>`
 const currentColorTheme = getColorTheme();
@@ -130,13 +130,57 @@ function setupMapInteractions(map) {
     }
 
     // Get the label from the feature and open the sidebar with it
-    sidebar.open(label)
+    sidebar.open(label, openNewWordFromSidebar)
 
     // Highlight the clicked node and its neighbors
-    await highlightNodeWithNeighbors(label, map, feature)
+    await highlightNodeWithNeighbors(label, map)
   }
 
-  async function highlightNodeWithNeighbors(nodeId, map, feature) {
+  function openNewWordFromSidebar(label, coordinates) {
+    // Preserve current zoom level instead of hardcoding to 6
+    const currentZoom = map.getZoom();
+    
+    map.flyTo({
+      center: coordinates,
+      zoom: currentZoom,
+      speed: 1.,
+      curve: 1.5,
+      essential: true // This animation is considered essential with respect to prefers-reduced-motion
+    });
+    
+    // Execute handleCircleClick after the fly animation is complete
+    map.once('moveend', async () => {
+      // Find the feature for this label
+      const feature = findFeatureByLabel(label);
+      if (feature) {
+        // Create an event object similar to what the map click would provide
+        const simulatedEvent = {
+          features: [feature]
+        };
+        await handleCircleClick(simulatedEvent, map);
+      }
+    });
+  }
+
+  // Helper function to find a feature by its label
+  function findFeatureByLabel(label) {
+    if (allRegionFeaturesStore && allRegionFeaturesStore.features) {
+      const regionFeature = allRegionFeaturesStore.features.find(
+        feature => feature.properties.label === label
+      );
+      
+      if (regionFeature) {
+        return {
+          ...regionFeature,
+          properties: { ...regionFeature.properties },
+          id: regionFeatureIds[label]
+        };
+      }
+    }
+    return null;
+  }
+
+  async function highlightNodeWithNeighbors(nodeId, map) {
     try {
       const graph = await getGraph();
       const nodeData = getNodeWithNeighbors(graph, nodeId);
