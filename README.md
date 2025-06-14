@@ -23,11 +23,6 @@ Clicking on a tile - is like discovering new land - it shows you both the flashc
 memorize the word better. The map is designed to be both educational and visually appealing, making language learning
 more fun.
 
-I built this map for myself, and since I'm a novice Chinese learner, I used ChatGPT to generate the translation and
-character breakdowns. Sometimes it makes mistakes, but this makes learning even more interesting! When you research
-a mistake you learn more about the word. You can also help improve the map by submitting corrections
-and suggestions through the GitHub repository (click on the link at the bottom of a flashcard).
-
 ## Contributors Wanted
 
 As a fellow language learner building this tool for myself, I know how much accurate flashcards matter. 
