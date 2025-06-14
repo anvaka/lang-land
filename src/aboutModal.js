@@ -82,7 +82,7 @@ class AboutModal {
       
       <div class="about-footer">
         <p>
-          <a href="https://github.com/anvaka/hsk-land" target="_blank" rel="noopener noreferrer">Code on GitHub</a>
+          <a href="https://github.com/anvaka/lang-land" target="_blank" rel="noopener noreferrer">Code on GitHub</a>
           • 
           <a href="http://paypal.com/paypalme/anvakos/5" target="_blank" rel="noopener noreferrer">Buy me a coffee</a> if you find this useful
         </p>
