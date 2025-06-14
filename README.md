@@ -7,7 +7,6 @@ similarity. Discover the new world of flashcards: https://anvaka.github.io/lang-
 
 ## Overview
 
-
 HSK Land is an interactive map that visualizes Mandarin Chinese vocabulary, grouping similar words together
 based on their meanings. It provides a unique way to explore and learn Chinese vocabulary by seeing connections
 between related words. When you click on any word, you'll see:
@@ -29,7 +28,48 @@ character breakdowns. Sometimes it makes mistakes, but this makes learning even 
 a mistake you learn more about the word. You can also help improve the map by submitting corrections
 and suggestions through the GitHub repository (click on the link at the bottom of a flashcard).
 
-## 🔨 Development
+## Contributors Wanted
+
+As a fellow language learner building this tool for myself, I know how much accurate flashcards matter. 
+The truth is, I used ChatGPT to generate most of the translations and breakdowns, and while it's pretty good,
+it definitely makes mistakes.
+
+### How You Can Help
+
+In the sidebar of each flashcard, you'll find a link to edit the card on GitHub:
+
+![Edit this card](sidebar_help.png)
+
+**Spot the Errors**
+- Fix translation mistakes or awkward phrasing  
+- Suggest better example sentences that show real usage
+- Correct character breakdowns and pronunciation
+
+**Make It Better**
+- Improve definitions to be more learner-friendly
+- Add cultural context where it helps
+- Share memory tricks that worked for you
+
+**It's Really Easy**
+Click "Edit this card" at the bottom of any flashcard, make your changes in GitHub, and submit.
+I review everything and merge quickly. No coding skills needed - GitHub's editor is straightforward.
+
+### What I'm Looking For
+
+I'd rather have someone fix one obviously wrong translation than write perfect documentation.
+Think about what would have helped you when you were learning that word. Real examples beat textbook sentences every time.
+
+### A Small Thank You
+
+Every contributor gets credit in the commit history. For bigger improvements, I'll mention you in the release notes.
+But honestly, the real reward is knowing you've made learning easier for thousands of other students.
+
+If you're new to GitHub, don't let that stop you. There are good tutorials out there, and the edit interface is
+pretty user-friendly. Even small fixes make a difference.
+
+Jump in and help make it better~
+
+## Development
 
 ### Setup
 
