@@ -46,7 +46,7 @@ In the sidebar of each flashcard, you'll find a link to edit the card on GitHub:
 - Share memory tricks that worked for you
 
 **It's Really Easy**
-Click "Edit this card" at the bottom of any flashcard, make your changes in GitHub, and submit.
+Click "Improve this card" at the bottom of any flashcard, make your changes in GitHub, and submit.
 I review everything and merge quickly. No coding skills needed - GitHub's editor is straightforward.
 
 ### What I'm Looking For
@@ -64,7 +64,7 @@ pretty user-friendly. Even small fixes make a difference.
 
 Jump in and help make it better~
 
-## Development
+## For those who want to develop the website
 
 ### Setup
 
