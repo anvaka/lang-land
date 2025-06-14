@@ -1,5 +1,24 @@
 import config from './config.js';
-export function getInitialMapStyle(currentColorTheme) {
+
+function getColorTheme() {
+  return {
+    background: '#030E2E',
+
+    circleColor: "#EAEDEF",
+    circleStrokeColor: "#000",
+    circleLabelsColor: "#FFF",
+    circleLabelsHaloColor: "#101",
+    circleLabelsHaloWidth: 1.2,
+
+    placeLabelsColor: "#FFF",
+    placeLabelsHaloColor: "#000",
+    placeLabelsHaloWidth: 0.2,
+  }
+}
+
+export function getInitialMapStyle() {
+  const currentColorTheme = getColorTheme();
+
   return {
     version: 8,
     glyphs: config.glyphsSource,
@@ -294,20 +313,4 @@ export function getInitialMapStyle(currentColorTheme) {
       },
     ]
   };
-}
-
-export function getColorTheme() {
-  return {
-    background: '#030E2E',
-
-    circleColor: "#EAEDEF",
-    circleStrokeColor: "#000",
-    circleLabelsColor: "#FFF",
-    circleLabelsHaloColor: "#101",
-    circleLabelsHaloWidth: 1.2,
-
-    placeLabelsColor: "#FFF",
-    placeLabelsHaloColor: "#000",
-    placeLabelsHaloWidth: 0.2,
-  }
 }
