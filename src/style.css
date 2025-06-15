@@ -129,6 +129,7 @@ html {
   opacity: 0.8;
 }
 
+
 .sidebar-content {
   padding: 16px;
   overflow-y: auto;
@@ -363,6 +364,19 @@ html {
   /* Ensure proper z-index layering on mobile */
   .sidebar {
     z-index: 1001;
+  }
+
+  .about-modal {
+    display: block;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    background-color: var(--sidebar-bg);
+  }
+  .about-modal .close-btn {
+    top: 32px;
+    right: 16px;
   }
 }
 
