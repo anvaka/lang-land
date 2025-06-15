@@ -1,0 +1,70 @@
+.search-container {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  z-index: 1001;
+  width: calc(var(--sidebar-width) - 32px);
+}
+
+.search-form {
+  display: flex;
+  background-color: var(--sidebar-bg);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--sidebar-border);
+  overflow: hidden;
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  color: var(--sidebar-text);
+  outline: none;
+  /* Remove default clear button in some browsers */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.search-input::placeholder {
+  color: rgba(128, 128, 128, 0.8);
+}
+
+.search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--sidebar-text);
+  transition: background-color 0.2s, color 0.2s;
+  padding: 0;
+}
+
+.search-button:hover, 
+.search-button:focus {
+  background-color: rgba(128, 128, 128, 0.2);
+}
+
+/* Screen reader only */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

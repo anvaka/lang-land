@@ -6,6 +6,7 @@ import { aboutModal } from './aboutModal';
 import { wordStats, statsModal } from './wordStats';
 import highlightNodeWithNeighbors from './highlightNodeWithNeighbors';
 import config from './config.js';
+import { searchBar } from './searchBar';
 
 
 // Track regions and features
@@ -47,6 +48,7 @@ map.touchZoomRotate.disableRotation();
 map.on('load', () => {
   setupMapInteractions(map);
   setupRegionLoading(map);
+  initSearchBar();
 });
 
 function setupMapInteractions(map) {
@@ -216,4 +218,46 @@ function findRegionFeatureByLabel(label) {
   if (!allRegionFeaturesStore || !allRegionFeaturesStore.features) return null;
 
   return allRegionFeaturesStore.features.find(feature => feature.properties.label === label);
+}
+
+/**
+ * Initialize the search bar
+ */
+function initSearchBar() {
+  searchBar.initialize(handleSearch);
+  searchBar.addToDOM(document.querySelector('#app'));
+}
+
+/**
+ * Handle search submission
+ * @param {string} searchTerm - The search term submitted
+ */
+function handleSearch(searchTerm) {
+  if (!searchTerm) return;
+  
+  // Look for an exact match in features
+  const feature = findRegionFeatureByLabel(searchTerm);
+  
+  if (feature) {
+    // If we found a match, simulate a click on that feature
+    const coordinates = feature.geometry.coordinates[0].reduce((acc, coord) => {
+      acc[0] += coord[0];
+      acc[1] += coord[1];
+      return acc;
+    }, [0, 0]);
+    
+    coordinates[0] /= feature.geometry.coordinates[0].length;
+    coordinates[1] /= feature.geometry.coordinates[0].length;
+    
+    // Fly to the location
+    flyTo(coordinates);
+    
+    // Simulate a click on the feature
+    map.once('moveend', () => {
+      handleCircleClick({ features: [feature] }, map);
+    });
+  } else {
+    // If no match is found, we could show a message or do nothing
+    console.log('No matching word found:', searchTerm);
+  }
 }

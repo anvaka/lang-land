@@ -3,6 +3,7 @@ import config from './config.js';
 
 import { getGraph } from './graph.js';
 import turnChineseWordsIntoLinks from './lib/turnChineseWordsIntoLinks.js';
+import { searchBar } from './searchBar.js';
 
 let graph = null;
 let rerenderWhenGraphReady = null;
@@ -34,6 +35,13 @@ class Sidebar {
         this.close();
       }
     });
+
+    // Listen for search bar clear events to close sidebar
+    searchBar.on('clear', () => {
+      if (this.isOpen) {
+        this.close();
+      }
+    });
   }
   
   initialize() {
@@ -41,13 +49,6 @@ class Sidebar {
     this.element = document.createElement('div');
     this.element.className = 'sidebar';
     this.element.setAttribute('aria-hidden', 'true');
-    
-    // Create close button (no header)
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'close-btn';
-    closeBtn.innerHTML = '&times;';
-    closeBtn.setAttribute('aria-label', 'Close sidebar');
-    closeBtn.addEventListener('click', () => this.close());
     
     // Create content container
     this.contentElement = document.createElement('div');
@@ -57,7 +58,6 @@ class Sidebar {
     this.createFontSizeControl();
     
     // Add elements to sidebar
-    this.element.appendChild(closeBtn);
     this.element.appendChild(this.contentElement);
     this.element.appendChild(this.fontSizeControl);
     
@@ -76,7 +76,7 @@ class Sidebar {
       if (this.openNewWordCallback) {
         const coordinates = graph.getNode(word)?.data?.l?.split(',').map(Number);
         this.openNewWordCallback(word, coordinates);
-        this.open(word, this.openNewWordCallback)
+        this.open(word, this.openNewWordCallback);
         e.preventDefault();
       }
     });
@@ -144,6 +144,9 @@ class Sidebar {
     
     // Get content based on label
     this.showContentForLabel(label);
+    
+    // Update search box value to match the current word
+    searchBar.setValue(label);
     
     // Open sidebar
     this.isOpen = true;
