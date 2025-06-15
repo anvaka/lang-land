@@ -54,6 +54,20 @@ export const wordStats = {
   },
 
   /**
+   * Gets the timestamp of the last click for a specific word
+   * @param {string} word - The word to check
+   * @returns {number|null} Timestamp of last click or null if never clicked
+   */
+  getLastClickTime(word) {
+    if (!word) return null;
+    
+    const history = this.getHistory();
+    if (!history[word] || history[word].length === 0) return null;
+    
+    return history[word][history[word].length - 1];
+  },
+
+  /**
    * Gets the number of clicks for a specific word
    * @param {string} word - The word to check
    * @returns {number} Click count
@@ -67,10 +81,9 @@ export const wordStats = {
 
   /**
    * Gets words sorted by click frequency
-   * @param {number} limit - Maximum number of results
    * @returns {Array} Array of {word, count} objects
    */
-  getMostClicked(limit = 10) {
+  getMostClicked() {
     const history = this.getHistory();
     
     return Object.entries(history)
@@ -80,7 +93,6 @@ export const wordStats = {
         lastClicked: timestamps[timestamps.length - 1]
       }))
       .sort((a, b) => b.count - a.count || b.lastClicked - a.lastClicked)
-      .slice(0, limit);
   },
 
   /**
@@ -134,6 +146,10 @@ export const statsModal = {
   element: null,
   isOpen: false,
   wordClickCallback: null,
+  sortState: {
+    column: 'count', // Default sort by click count
+    direction: 'asc' // Default direction (ascending)
+  },
 
   /**
    * Initialize the stats sidebar
@@ -197,6 +213,15 @@ export const statsModal = {
 
     // Handle clicks on words to navigate to them on the map
     this.element.addEventListener('click', (e) => {
+      // Handle column header sorting
+      const sortHeader = e.target.closest('.sortable');
+      if (sortHeader) {
+        const sortColumn = sortHeader.dataset.sort;
+        this.handleSort(sortColumn);
+        return;
+      }
+      
+      // Handle word item clicks
       const wordItem = e.target.closest('.word-stat-item');
       if (wordItem) {
         const wordName = wordItem.querySelector('.word-name').textContent;
@@ -206,6 +231,25 @@ export const statsModal = {
         }
       }
     });
+  },
+  
+  /**
+   * Handle sorting when a column header is clicked
+   * @param {string} column - The column name to sort by
+   */
+  handleSort(column) {
+    // If clicking the same column, toggle direction
+    if (this.sortState.column === column) {
+      this.sortState.direction = this.sortState.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      // If clicking a different column, set it as active with default direction
+      this.sortState.column = column;
+      // Use sensible default directions based on column type
+      this.sortState.direction = column === 'word' ? 'asc' : 'desc';
+    }
+    
+    // Refresh the display with new sort
+    this.refreshStats();
   },
 
   /**
@@ -226,12 +270,33 @@ export const statsModal = {
   },
 
   /**
+   * Sort data based on current sort state
+   * @param {Array} data - Array of word stats objects to sort
+   * @returns {Array} Sorted array
+   */
+  sortData(data) {
+    const { column, direction } = this.sortState;
+    const multiplier = direction === 'asc' ? 1 : -1;
+    
+    return data.sort((a, b) => {
+      if (column === 'word') {
+        return multiplier * a.word.localeCompare(b.word);
+      } else if (column === 'count') {
+        return multiplier * (a.count - b.count);
+      } else if (column === 'lastClicked') {
+        return multiplier * (a.lastClicked - b.lastClicked);
+      }
+      return 0;
+    });
+  },
+
+  /**
    * Update statistics display with fresh data
    */
   refreshStats() {
     const uniqueWords = wordStats.getUniqueWordCount();
     const totalClicks = wordStats.getTotalClickCount();
-    const mostClicked = wordStats.getMostClicked(10);
+    let mostClicked = wordStats.getMostClicked();
     
     document.getElementById('unique-words').textContent = uniqueWords;
     document.getElementById('total-clicks').textContent = totalClicks;
@@ -241,28 +306,39 @@ export const statsModal = {
     if (mostClicked.length === 0) {
       listContainer.innerHTML = '<p class="no-data">No words viewed yet. Start exploring!</p>';
     } else {
+      // Sort the data according to current sort state
+      mostClicked = this.sortData(mostClicked);
+      
+      // Create sorting indicators for headers
+      const getSortIndicator = (col) => {
+        if (this.sortState.column !== col) return '';
+        return this.sortState.direction === 'asc' ? ' ↑' : ' ↓';
+      };
+      
       listContainer.innerHTML = `
-        <table class="word-stats-table">
-          <thead>
-            <tr>
-              <th class="word-column">Word</th>
-              <th class="count-column">Views</th>
-              <th class="time-column">Last Viewed</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${mostClicked.map(({ word, count, lastClicked }) => {
-              const formattedDate = this.formatTimestamp(lastClicked);
-              return `
-                <tr class="word-stat-item" data-word="${word}">
-                  <td class="word-name">${word}</td>
-                  <td class="word-count">${count}</td>
-                  <td class="word-last-viewed">${formattedDate}</td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
+        <div style="overflow-y: auto; width: 100%;max-height: 400px;">
+          <table class="word-stats-table">
+            <thead>
+              <tr>
+                <th class="word-column sortable" data-sort="word" title="Click to sort alphabetically">Word${getSortIndicator('word')}</th>
+                <th class="count-column sortable" data-sort="count" title="Click to sort by view count">Views${getSortIndicator('count')}</th>
+                <th class="time-column sortable" data-sort="lastClicked" title="Click to sort by last viewed time">Last Viewed${getSortIndicator('lastClicked')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${mostClicked.map(({ word, count, lastClicked }) => {
+                const formattedDate = this.formatTimestamp(lastClicked);
+                return `
+                  <tr class="word-stat-item" data-word="${word}">
+                    <td class="word-name">${word}</td>
+                    <td class="word-count">${count}</td>
+                    <td class="word-last-viewed">${formattedDate}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
     }
   },

@@ -69,10 +69,12 @@
 
 /* Word list container */
 .most-clicked-list {
-  max-height: 300px;
-  overflow-y: auto;
+  max-height: 400px;
   border-radius: 6px;
   background-color: var(--sidebar-bg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .no-data {
@@ -104,7 +106,10 @@
 }
 
 /* Stats data table */
-.word-stats-table { width: 100%; }
+.word-stats-table { 
+  width: 100%;
+  table-layout: fixed;
+}
 
 .word-stats-table th,
 .word-stats-table td {
@@ -113,7 +118,34 @@
   border-bottom: 1px solid var(--sidebar-border);
 }
 
-.word-stats-table th { text-transform: uppercase; }
+.word-stats-table th { 
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  background-color: var(--sidebar-bg);
+  z-index: 1;
+  box-shadow: 0 1px 0 var(--sidebar-border);
+}
+
+/* Sortable column headers */
+.word-stats-table th.sortable {
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  padding-right: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.word-stats-table thead {
+  position: sticky;
+  background-color: var(--sidebar-bg);
+  top: 0;
+}
+
+.word-stats-table th.sortable:hover {
+  background-color: rgba(100, 108, 255, 0.05);
+}
 
 /* Column widths and alignment */
 .word-stats-table .word-column { width: 40%; }
@@ -134,7 +166,6 @@
 .word-stats-table .word-count { text-align: center; }
 .word-stats-table .word-last-viewed {
   font-size: 0.85rem;
-  opacity: 0.8;
   text-align: right;
 }
 

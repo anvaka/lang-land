@@ -1,6 +1,6 @@
 import './style.css';
 import maplibregl from 'maplibre-gl'
-import { getInitialMapStyle } from './mapStyles';
+import { getInitialMapStyle, getRegionOpacity } from './mapStyles.js';
 import { sidebar } from './sidebar';
 import { aboutModal } from './aboutModal';
 import { wordStats, statsModal } from './wordStats';
@@ -89,7 +89,12 @@ async function setupRegionLoading(map) {
   // Use wordStats to determine which regions were previously discovered
   Object.keys(wordStats.getHistory()).forEach(word => {
     if (regionFeatureIds[word] !== undefined) {
-      map.setFeatureState({ source: 'region-boundaries', id: regionFeatureIds[word] }, { discovered: true });
+      map.setFeatureState(
+        { source: 'region-boundaries', id: regionFeatureIds[word] },
+        { 
+          opacity: getRegionOpacity(word)
+        }
+      );
     }
   });
 
@@ -166,11 +171,11 @@ async function handleCircleClick(e, map) {
   }
 
   if (regionFeatureIds[label] !== undefined) {
-    // Mark as discovered and reveal underlying raster
-    // wordStats.recordClick already saves to localStorage
+    // Reveal underlying raster with calculated opacity
     map.setFeatureState(
       { source: 'region-boundaries', id: regionFeatureIds[label] },
-      { discovered: true }
+      // Start with 0 opacity when just discovered:
+      { opacity: 0 }
     )
 
     // Find the complete region feature from the stored features collection

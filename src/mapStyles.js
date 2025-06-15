@@ -1,4 +1,33 @@
 import config from './config.js';
+import { wordStats } from './wordStats.js';
+
+/**
+ * Calculates region opacity based on time since last discovery
+ * - Recently discovered (< 60s): fully transparent (0 opacity)
+ * - Never discovered: fully opaque (1 opacity)
+ * - Gradient between based on elapsed time
+ * 
+ * @param {string} label - Word label to calculate opacity for
+ * @param {number} maxAge - Time in ms after which opacity returns to 1 (default: 1 week)
+ * @returns {number} Opacity value between 0 and 1
+ */
+export function getRegionOpacity(label) {
+  const lastClickTime = wordStats.getLastClickTime(label);
+  if (!lastClickTime) return 1; // Never discovered: fully opaque
+  
+  const now = Date.now();
+  const elapsedMs = now - lastClickTime;
+  
+  // Less than 60 seconds ago: fully transparent
+  if (elapsedMs < 60 * 1000) return 0;
+  
+  // More than 1 week ago: fully opaque
+  const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+  if (elapsedMs > oneWeekMs) return 1;
+  
+  // Gradient between 0 and 1 based on elapsed time
+  return elapsedMs / oneWeekMs;
+}
 
 function getColorTheme() {
   return {
@@ -100,12 +129,7 @@ export function getInitialMapStyle() {
         "minzoom": 4.2,
         "paint": {
           "fill-color": ["get", "fill"],
-          "fill-opacity": [
-            "case",
-            ["boolean", ["feature-state", "discovered"], false],
-            0,
-            1
-          ]
+          "fill-opacity": ["feature-state", "opacity"]
         }
       },
       {
