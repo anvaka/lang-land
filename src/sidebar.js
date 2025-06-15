@@ -44,7 +44,7 @@ class Sidebar {
     
     // Create close button (no header)
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'sidebar-close';
+    closeBtn.className = 'close-btn';
     closeBtn.innerHTML = '&times;';
     closeBtn.setAttribute('aria-label', 'Close sidebar');
     closeBtn.addEventListener('click', () => this.close());

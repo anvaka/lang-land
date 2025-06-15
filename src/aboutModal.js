@@ -25,7 +25,7 @@ class AboutModal {
     
     // Create close button
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'about-close-btn';
+    closeBtn.className = 'close-btn';
     closeBtn.innerHTML = '&times;';
     closeBtn.setAttribute('aria-label', 'Close about dialog');
     closeBtn.addEventListener('click', () => this.close());

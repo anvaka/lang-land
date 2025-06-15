@@ -1,0 +1,159 @@
+/* Stats sidebar and controls
+ * Uses CSS variables from style.css where possible
+ * Built on similar patterns as the main sidebar
+ */
+
+/* Stats sidebar - right-side mirror of the main sidebar */
+.stats-sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--sidebar-width);
+  height: 100%;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 900;
+  border-left: 1px solid var(--sidebar-border);
+  box-shadow: var(--sidebar-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.stats-sidebar.open {
+  transform: translateX(0);
+}
+
+.stats-sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.stats-content {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Stats data visualization */
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--sidebar-border);
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--sidebar-text);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Word list container */
+.most-clicked-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 6px;
+  background-color: var(--sidebar-bg);
+}
+
+.no-data {
+  text-align: center;
+  opacity: 0.6;
+  font-style: italic;
+  padding: 24px;
+}
+
+/* Action buttons */
+.stats-actions {
+  padding-top: 16px;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.clear-stats-btn {
+  background-color: transparent;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.clear-stats-btn:hover {
+  background-color: var(--sidebar-border);
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+/* Stats data table */
+.word-stats-table { width: 100%; }
+
+.word-stats-table th,
+.word-stats-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.word-stats-table th { text-transform: uppercase; }
+
+/* Column widths and alignment */
+.word-stats-table .word-column { width: 40%; }
+.word-stats-table .count-column { width: 20%; text-align: center; }
+.word-stats-table .time-column { width: 40%; text-align: right; }
+
+/* Interactive elements */
+.word-stats-table tr.word-stat-item {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.word-stats-table tr.word-stat-item:hover {
+  background-color: rgba(100, 108, 255, 0.1);
+}
+
+.word-stats-table .word-name { font-weight: 500; }
+.word-stats-table .word-count { text-align: center; }
+.word-stats-table .word-last-viewed {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  text-align: right;
+}
+
+/* Light theme adjustments */
+@media (prefers-color-scheme: light) {
+  .word-stats-table tr.word-stat-item:hover {
+    background-color: rgba(100, 108, 255, 0.05);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .stats-summary { gap: 12px; }
+  .stat-number { font-size: 1.6rem; }
+  
+  .word-stats-table { font-size: 0.9rem; }
+  .word-stats-table th { font-size: 0.75rem; }
+  
+  .word-stats-table .word-column { width: 35%; }
+  .word-stats-table .count-column { width: 15%; }
+  .word-stats-table .time-column { width: 50%; }
+}

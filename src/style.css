@@ -108,7 +108,7 @@ html {
   transform: translateX(0);
 }
 
-.sidebar-close {
+.close-btn {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -116,7 +116,6 @@ html {
   border: none;
   color: var(--sidebar-text);
   font-size: 1.5rem;
-  cursor: pointer;
   padding: 0;
   width: 28px;
   height: 28px;
@@ -126,7 +125,7 @@ html {
   z-index: 10;
 }
 
-.sidebar-close:hover {
+.close-btn:hover {
   opacity: 0.8;
 }
 
@@ -283,46 +282,14 @@ html {
 
 .font-size-reset {
   background: transparent;
-  border: 1px solid var(--sidebar-border);
-  color: var(--sidebar-text);
-  font-size: 0.8rem;
   padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
   transition: all 0.2s ease;
   opacity: 0.8;
 }
 
 .font-size-reset:hover {
   opacity: 1;
-  border-color: #646cff;
   background: rgba(100, 108, 255, 0.1);
-}
-
-/* About button styles */
-.about-button {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  background-color: var(--sidebar-bg);
-  color: var(--sidebar-text);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 18px;
-  box-shadow: var(--sidebar-shadow);
-  border: 1px solid var(--sidebar-border);
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s ease;
-}
-
-.about-button:hover {
-  transform: scale(1.05);
-  border-color: #646cff;
 }
 
 /* About modal styles */
@@ -360,28 +327,6 @@ html {
   padding: 24px;
 }
 
-.about-close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: transparent;
-  border: none;
-  color: var(--sidebar-text);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-
-.about-close-btn:hover {
-  opacity: 0.8;
-}
-
 .about-content {
   padding-right: 20px;
 }
@@ -403,20 +348,21 @@ html {
   text-align: center;
 }
 
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   :root {
     --sidebar-width: 100%;
   }
   
-  .about-button {
-    bottom: 12px;
-    right: 12px;
+  /* Faster transitions on mobile */
+  .sidebar, .stats-sidebar {
+    transition: transform 0.2s ease-in-out;
   }
   
-  /* Faster transitions on mobile */
+  /* Ensure proper z-index layering on mobile */
   .sidebar {
-    transition: transform 0.2s ease-in-out;
+    z-index: 1001;
   }
 }
 
@@ -430,14 +376,6 @@ html {
 
 .feedback-link {
   color: rgba(128, 128, 128, 0.9);
-}
-
-.feedback-link a {
-  color: rgba(100, 108, 255, 0.9);
-}
-
-.feedback-link a:hover {
-  color: rgba(100, 108, 255, 1);
 }
 
 /* Welcome content styles */
@@ -465,35 +403,12 @@ html {
   padding-left: 20px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #f7df1eaa);
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
+  font-size: 0.8rem;
   padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--sidebar-bg);
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -503,4 +418,10 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.control-buttons {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
 }
