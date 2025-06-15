@@ -162,6 +162,7 @@ class Sidebar {
     this.isOpen = false;
     this.element.classList.remove('open');
     this.element.setAttribute('aria-hidden', 'true');
+    searchBar.clear();
     
     return this;
   }

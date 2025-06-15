@@ -34,7 +34,7 @@
 }
 
 .stats-content {
-  padding: 16px;
+  padding: 0 16px;
   overflow-y: auto;
   flex: 1;
 }
@@ -168,6 +168,7 @@
   font-size: 0.85rem;
   text-align: right;
 }
+.stats.close-btn { top: 18px; }
 
 /* Light theme adjustments */
 @media (prefers-color-scheme: light) {
@@ -178,8 +179,10 @@
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
+  .stats-sidebar { padding-top: 48px; }
   .stats-summary { gap: 12px; }
   .stat-number { font-size: 1.6rem; }
+  .stats.close-btn { top: 67px; }
   
   .word-stats-table { font-size: 0.9rem; }
   .word-stats-table th { font-size: 0.75rem; }

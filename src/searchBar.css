@@ -57,6 +57,35 @@
   background-color: rgba(128, 128, 128, 0.2);
 }
 
+/* Autocomplete dropdown styles */
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--sidebar-bg);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: -2px;
+  border: 1px solid var(--sidebar-border);
+  border-top: none;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--sidebar-text);
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover,
+.dropdown-item.selected {
+  background-color: rgba(128, 128, 128, 0.2);
+}
+
 /* Screen reader only */
 .visually-hidden {
   position: absolute;
