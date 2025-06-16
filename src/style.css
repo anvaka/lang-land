@@ -91,7 +91,7 @@ html {
   top: 0;
   left: 0;
   width: var(--sidebar-width);
-  height: 100%;
+  height: calc(100% - 46px); /* Adjusted for header height */
   background-color: var(--sidebar-bg);
   color: var(--sidebar-text);
   transform: translateX(-100%);

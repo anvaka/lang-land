@@ -97,3 +97,11 @@
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+@media (max-width: 600px) {
+  .search-container {
+    top: 6px;
+    left: 6px;
+    width: calc(var(--sidebar-width) - 12px);
+  }
+}

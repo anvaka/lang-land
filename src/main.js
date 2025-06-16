@@ -253,9 +253,7 @@ function handleSearch(searchTerm) {
     flyTo(coordinates);
     
     // Simulate a click on the feature
-    map.once('moveend', () => {
-      handleCircleClick({ features: [feature] }, map);
-    });
+    handleCircleClick({ features: [feature] }, map);
   } else {
     // If no match is found, we could show a message or do nothing
     console.log('No matching word found:', searchTerm);
