@@ -139,10 +139,7 @@ function openNewWordFromSidebar(label, coordinates) {
 
   const feature = findRegionFeatureByLabel(label);
   if (!feature) return;
-  // Execute handleCircleClick after the fly animation is complete
-  map.once('moveend', () => {
-    handleCircleClick({ features: [feature] }, map);
-  });
+  handleCircleClick({ features: [feature] }, map);
 }
 
 function flyTo(coordinates) {
